@@ -11,6 +11,7 @@ from models.base import BaseModel
 
 logger = logging.getLogger(__name__)
 
+
 class BaseService:
 
     index: str
@@ -60,9 +61,11 @@ class BaseService:
             query: Optional[str] = None,
             filter: Optional[str] = None,
             sort: Optional[str] = None,
+            filter_suspicious: bool = True,
     ):
         """
         Поиск по параметрам
+        :param filter_suspicious:
         :param page: номер страницы
         :param size: количество элементов на странице
         :param query: запрос
@@ -80,7 +83,11 @@ class BaseService:
             search_query = search_query.query("bool", filter=Q("term", genre=filter))
         if sort:
             search_query = search_query.sort(sort)
+        if filter_suspicious:
+            search_query = search_query.filter('term', suspicious=False)
+
         items = await self._search_elastic(search_query.to_dict())
+
         return [self.model(**item["_source"]) for item in items]
 
     async def _get_from_elastic(self, item_id: UUID) -> Optional[BaseModel]:
