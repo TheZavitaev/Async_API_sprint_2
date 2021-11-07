@@ -20,3 +20,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Standard cache time
 FIVE_MIN = int(timedelta(minutes=5).total_seconds())
+
+JWT_PUBLIC_KEY: str = os.getenv('JWT_PUBLIC_KEY')
+JWT_ALGORITHM: str = 'RS256'

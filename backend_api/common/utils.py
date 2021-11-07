@@ -5,6 +5,7 @@ from typing import Any
 from fastapi_cache.coder import Coder, JsonEncoder, object_hook
 logger = logging.getLogger(__name__)
 
+
 class ModelCoder(Coder):
     @classmethod
     def encode(cls, value: Any):

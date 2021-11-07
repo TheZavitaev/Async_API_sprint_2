@@ -42,4 +42,3 @@ async def genres_all(
         size: int = SIZE_PARAM,
         genre_service: GenreService = Depends(get_genre_service)) -> list[GenreDetail]:
     return await genre_service.get_all(page, size)
-

@@ -1,14 +1,14 @@
 import logging
 from typing import Optional
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi_cache.decorator import cache
+
 from api.v1.constants import PAGE_PARAM, SIZE_PARAM
-from models.film import Film, FilmShort
-from services.film_service import FilmService, get_film_service
 from common.utils import ModelCoder
 from core.config import FIVE_MIN
+from models.film import Film, FilmShort
+from services.film_service import FilmService, get_film_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
