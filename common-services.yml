@@ -1,0 +1,7 @@
+version: "3.9"
+
+services:
+  backend_api:
+    container_name: backend_api
+    build:
+      context: backend_api

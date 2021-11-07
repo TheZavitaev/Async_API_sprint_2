@@ -1,0 +1,32 @@
+[
+    {
+        "_index": "genres",
+         "_id": "64623db7-f97a-459b-a5eb-5c5cf97f1f69",
+        "_score": 1.0,
+        "_source": {
+            "id":"64623db7-f97a-459b-a5eb-5c5cf97f1f69",
+            "name":"Clements LLC",
+            "filmworks": []
+        }
+    },
+    {
+        "_index": "genres",
+         "_id": "728ea72a-9235-491c-8dff-6e2aae967e6f",
+        "_score": 1.0,
+        "_source": {
+            "id":"728ea72a-9235-491c-8dff-6e2aae967e6f",
+            "name":"Hampton and Sons",
+            "filmworks": []
+        }
+    },
+    {
+        "_index": "genres",
+         "_id": "03f4a78b-f84c-4059-997c-84de4f98e47d",
+        "_score": 1.0,
+        "_source": {
+            "id":"03f4a78b-f84c-4059-997c-84de4f98e47d",
+            "name":"Long LLC",
+            "filmworks": []
+        }
+    }
+]

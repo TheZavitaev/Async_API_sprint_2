@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  backend_api:
+    restart: unless-stopped
+    container_name: backend_api
+    extends:
+      file: common-services.yml
+      service: backend_api
+    command: python main.py
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend_api/:/api/
+    depends_on:
+      - es
+
+  backend_admin:
+    restart: unless-stopped
+    container_name: backend_admin
+    build:
+      context: https://github.com/blackorangefox/backend_admin.git#main
+    volumes:
+      - static:/static
+    depends_on:
+      - postgres
+    ports:
+      - '8001:80'
+    expose:
+      - '8000'
+    env_file:
+      - deploys/dev.env
+
+  postgres:
+    image: postgres:13.3
+    restart: unless-stopped
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+    env_file:
+      - deploys/dev.env
+
+  nginx:
+    image: nginx:1.21.1-alpine
+    restart: always
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - static:/static
+    ports:
+      - 80:80
+    depends_on:
+      - backend_admin
+
+  es:
+    container_name: es
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  redis:
+    restart: unless-stopped
+    container_name: redis
+    ports:
+      - 6379:6379
+    image: redis:6.2.5
+    volumes:
+      - redisdata:/data
+
+  etl:
+    container_name: ETL
+    build:
+      context: https://github.com/blackorangefox/postgres_to_es.git#main
+    env_file:
+      - deploys/dev.env
+    depends_on:
+      - es
+      - redis
+      - backend_admin
+
+
+volumes:
+  postgresdata:
+  static:
+  redisdata:
+  esdata:

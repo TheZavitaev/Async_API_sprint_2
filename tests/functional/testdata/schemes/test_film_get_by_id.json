@@ -1,0 +1,53 @@
+{
+    "type" : "object",
+    "properties": {
+      "id": { "type": "string"},
+      "title": {"type": "string"},
+      "description": {"type": "string"},
+      "imdb_rating": {"type": "number"},
+      "genres": {"type": "array",
+        "items": {"type": "string"}
+      },
+      "directors": {"type": "array",
+        "items": {"type": ["string", "null"]}
+      },
+      "actors": {
+        "type": "array",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "birth_date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "film_ids": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      },
+      "writers": {"type": "array",
+        "items": {"type": ["string", "null"]}
+      }
+    }
+  }

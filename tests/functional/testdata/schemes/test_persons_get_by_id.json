@@ -1,0 +1,14 @@
+{
+    "type" : "object",
+    "properties": {
+      "id": { "type": "string"},
+      "name": {"type": "string"},
+      "birth_date": {"type": ["string", "null"]},
+      "roles": {"type": "array",
+        "items": {"type": ["string", "null"]}
+      },
+      "film_ids": {"type": "array",
+        "items": {"type": ["string", "null"]}
+      }
+    }
+  }
