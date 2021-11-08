@@ -21,7 +21,7 @@ from db import elastic
 from db import redis_bd
 
 
-class JWTAuthBackend(AuthenticationBackend):
+class JWTAuthBackend(AuthenticationBackend):  # https://habr.com/ru/post/502814/
     def __init__(
             self, secret_key: str = config.JWT_PUBLIC_KEY,
             algorithm: str = config.JWT_ALGORITHM,
@@ -61,7 +61,6 @@ class JWTAuthBackend(AuthenticationBackend):
             jwt_decoded = jwt.decode(token, key=str(self.secret_key), algorithms=self.algorithm)
 
         except PyJWTError as err:
-            logging.error(str(err))
             logging.exception('invalid token, user is unauthenticated')
             raise AuthenticationError('Invalid credentials')
 
