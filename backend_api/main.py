@@ -1,4 +1,5 @@
 import logging
+from typing import Optional, Tuple
 
 import aioredis
 import jwt
@@ -11,6 +12,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from jwt import PyJWTError
 from starlette.authentication import AuthenticationBackend, AuthenticationError, AuthCredentials, SimpleUser
 from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.requests import Request
 
 from api.v1 import film_api, genre_api, person_api
 from core import config
@@ -21,7 +23,7 @@ from db import elastic
 from db import redis_bd
 
 
-class JWTAuthBackend(AuthenticationBackend):  # https://habr.com/ru/post/502814/
+class JWTAuthBackend(AuthenticationBackend):
     def __init__(
             self, secret_key: str = config.JWT_PUBLIC_KEY,
             algorithm: str = config.JWT_ALGORITHM,
@@ -32,7 +34,7 @@ class JWTAuthBackend(AuthenticationBackend):  # https://habr.com/ru/post/502814/
         self.prefix = prefix
 
     @classmethod
-    def get_token_from_header(cls, authorization: str, prefix: str):
+    def get_token_from_header(cls, authorization: str, prefix: str) -> Optional[str]:
         try:
             scheme, token = authorization.split()
             if scheme.lower() != prefix.lower():
@@ -49,7 +51,7 @@ class JWTAuthBackend(AuthenticationBackend):  # https://habr.com/ru/post/502814/
 
         return token
 
-    async def authenticate(self, request):
+    async def authenticate(self, request: Request) -> Tuple[AuthCredentials, SimpleUser]:
         if 'Authorization' not in request.headers:
             logging.debug('user no auth')
             return None
