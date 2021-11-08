@@ -23,3 +23,4 @@ FIVE_MIN = int(timedelta(minutes=5).total_seconds())
 
 JWT_PUBLIC_KEY: str = os.getenv('JWT_PUBLIC_KEY')
 JWT_ALGORITHM: str = 'RS256'
+JWT_PREFIX: str = 'Bearer'

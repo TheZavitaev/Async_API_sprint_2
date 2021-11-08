@@ -3,58 +3,66 @@ import logging
 import aioredis
 import jwt
 import uvicorn as uvicorn
-from fastapi import FastAPI
-from fastapi_cache import FastAPICache
 from elasticsearch import AsyncElasticsearch
+from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 from jwt import PyJWTError
 from starlette.authentication import AuthenticationBackend, AuthenticationError, AuthCredentials, SimpleUser
+from starlette.middleware.authentication import AuthenticationMiddleware
 
+from api.v1 import film_api, genre_api, person_api
+from core import config
+from core.logger import LOGGING
 from core.permissions import Permissions
 from core.registry import filter_suspicious
 from db import elastic
 from db import redis_bd
-from core import config
-from core.logger import LOGGING
-from api.v1 import film_api, genre_api, person_api
-
-from fastapi_cache.backends.redis import RedisBackend
 
 
 class JWTAuthBackend(AuthenticationBackend):
-    async def authenticate(self, request):
+    def __init__(
+            self, secret_key: str = config.JWT_PUBLIC_KEY,
+            algorithm: str = config.JWT_ALGORITHM,
+            prefix: str = config.JWT_PREFIX
+    ):
+        self.secret_key = secret_key
+        self.algorithm = algorithm
+        self.prefix = prefix
 
-        if 'Authorization' not in request.headers:
-            logging.debug('user no auth')
-
-            return None
-
-        auth = request.headers['Authorization']
-
+    @classmethod
+    def get_token_from_header(cls, authorization: str, prefix: str):
         try:
-            scheme, token = auth.split()
-            if scheme.lower() != 'bearer':
+            scheme, token = authorization.split()
+            if scheme.lower() != prefix.lower():
                 logging.debug('not bearer auth')
-
-                return None
+                raise AuthenticationError(f'Authorization scheme {scheme} is not supported')
 
         except ValueError:
-            logging.debug(f'Invalid authorization header: {auth}')
-
+            logging.debug(f'Invalid authorization header: {authorization}')
             raise AuthenticationError('Invalid authorization')
 
         if not token:
             logging.debug('no token')
-
             return None
 
+        return token
+
+    async def authenticate(self, request):
+        if 'Authorization' not in request.headers:
+            logging.debug('user no auth')
+            return None
+
+        authorization = request.headers['Authorization']
+        token = self.get_token_from_header(authorization=authorization, prefix=self.prefix)
+
         try:
-            jwt_decoded = jwt.decode(token, config.JWT_PUBLIC_KEY, algorithms=[config.JWT_ALGORITHM])
+            jwt_decoded = jwt.decode(token, key=str(self.secret_key), algorithms=self.algorithm)
 
         except PyJWTError as err:
             logging.error(str(err))
             logging.exception('invalid token, user is unauthenticated')
-
             raise AuthenticationError('Invalid credentials')
 
         permissions = jwt_decoded['permissions']
@@ -73,6 +81,9 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
 )
+
+# https://fastapi.tiangolo.com/advanced/middleware/
+app.add_middleware(AuthenticationMiddleware, backend=JWTAuthBackend())
 
 
 @app.on_event("startup")
